@@ -1,6 +1,6 @@
 #import array
 from array import *
-
+#array creation and initilization
 a=array('f',[1,2,3,4,5.0])
 print(a)
 
@@ -17,3 +17,6 @@ while k<len(a):
 for l in range(0,len(a)):
     print(a[l])
 
+print(a.buffer_info())
+
+print(a.typecode)

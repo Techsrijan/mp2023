@@ -1,7 +1,8 @@
 from tkinter import *
 root=Tk()
 def gettext():
-    c=a.get()
+    c=int(a.get())
+
     #print(c)
     result.set(c)
 
@@ -9,8 +10,8 @@ btn4=Button(root,text="click me4",bg="black",fg="yellow",
         font=("Comic Sans Ms",15,"bold"),command=gettext)
 btn4.place(x=50,y=150)
 
-a=IntVar()
-txt=Entry(root,font=("Comic Sans Ms",15,"bold"),textvariable=a)
+a=StringVar()
+txt=Entry(root,bd="10",justify="right",show="#",font=("Comic Sans Ms",15,"bold"),textvariable=a)
 txt.place(x=200,y=150)
 
 result=StringVar()

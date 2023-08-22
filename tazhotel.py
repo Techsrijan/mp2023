@@ -5,6 +5,13 @@ taz=Tk()
 h=taz.winfo_screenheight()
 w=taz.winfo_screenwidth()
 #print(h,w)
+
+
+
+############ billgenerationwindow ##########
+def billgenerationwindow():
+    pass
+
 ############### database connectivity #################
 def db_connect():
     global mycursor,con
@@ -29,63 +36,151 @@ def mainHeading():
 def adminLogout():
     remove_all_widgets()
     adminLogin()
-########### welcome window #########################
-def welcomewindow():
+
+########### back button ########
+def backbutton():
     remove_all_widgets()
-    mainHeading()
-    windowLabel = Label(taz, text="Admin Window", font="Arial 20")
-    windowLabel.grid(row=1, column=1, padx=(50, 0), columnspan=2, pady=10)
-    btnLogout = Button(taz, text="Logout", font="Arial 15", bg="green", fg="white", command=adminLogout)
-    btnLogout.grid(row=2, column=1, padx=20, pady=5, columnspan=2)
-############### adminLoginProcess ###################
-def adminLoginProcess():
-    if usernameVar.get()=='' or passwordVar.get()=='':
-        messagebox.showerror(title="Login Error",message="Please Fill User Name and Password")
+    welcomewindow()
+
+############################
+def additem():
+    item_name=itemnameVar.get()
+    item_rate=itemrateVar.get()
+    item_type=itemTypeVar.get()
+    if item_name=='' or item_rate=='' or item_type=='':
+        messagebox.showerror(title='Item Insert Error',
+                             message='Please Fill all Details')
     else:
         db_connect()
-        #print(usernameVar.get())
-        #print(passwordVar.get())
-        username = usernameVar.get().strip()
-        password = passwordVar.get().strip()
-        que = "select * from login_info where binary username=%s and binary password=%s"
-        val = (username, password)
-        mycursor.execute(que, val)
-        data = mycursor.fetchall()
-        flag = False
-        for row in data:
-            flag = True
+        query = "insert into itemlist (item_name,item_rate,item_type) values(%s,%s,%s)"
+        val = (item_name, item_rate, item_type)
+        mycursor.execute(query, val)
+        con.commit()
+        messagebox.showinfo("Save Data", 'Item Inserted Successfully')
+        itemnameVar.set("")
+        itemrateVar.set("")
+        itemTypeVar.set("")
+def updateItem():
+    pass
+def deleteItem():
+    pass
 
-        con.close()
-        if flag == True:
-            welcomewindow()
+########## additemwindow #########
 
-        else:
-            messagebox.showerror(title="Login Error", message="Either USerName or Password is Incorrect")
-            usernameVar.set('')
-            passwordVar.set('')
+itemnameVar=StringVar()
+itemrateVar=StringVar()
+itemTypeVar=StringVar()
+def additemwindow():
+    remove_all_widgets()
+    mainHeading()
+    itemnameLabel = Label(taz, text="ITEM DETAILS", font="Arial 30")
+    itemnameLabel.grid(row=1, column=1, padx=(50, 0), columnspan=2, pady=10)
+
+    ###############################
+    billButton = Button(taz, text="Back", width=20, height=2, fg="green", bd=10, command=backbutton)
+    billButton.grid(row=1, column=0)
+
+    logoutButton = Button(taz, text="Logout", width=20, height=2, fg="green", bd=10, command=adminLogout)
+    logoutButton.grid(row=1, column=3)
+
+    ###########################
+
+    itemnameLabel = Label(taz, text="Item name")
+    itemnameLabel.grid(row=2, column=1, padx=20, pady=5)
+
+    itemrateLabel = Label(taz, text="Item Rate")
+    itemrateLabel.grid(row=3, column=1, padx=20, pady=5)
+
+    itemTypeLabel = Label(taz, text="Item Type")
+    itemTypeLabel.grid(row=4, column=1, padx=20, pady=5)
+
+    itemnameEntry = Entry(taz, textvariable=itemnameVar)
+    itemnameEntry.grid(row=2, column=2, padx=20, pady=5)
+
+
+    itemrateEntry = Entry(taz, textvariable=itemrateVar)
+    itemrateEntry.grid(row=3, column=2, padx=20, pady=5)
+
+
+    itemTypeEntry = Entry(taz, textvariable=itemTypeVar)
+    itemTypeEntry.grid(row=4, column=2, padx=20, pady=5)
+
+    updateButton = Button(taz, text="UpDate Item", width=20, height=2, fg="green", bd=10, command=updateItem)
+    updateButton.grid(row=6, column=0)
+
+    additemButton = Button(taz, text="Add Item", width=20, height=2, fg="green", bd=10, command=additem)
+    additemButton.grid(row=6, column=1,columnspan=2)
+
+
+    deleteButton = Button(taz, text="Delete Item", width=20, height=2, fg="green", bd=10, command=deleteItem)
+    deleteButton.grid(row=6, column=3)
+
+
+########### welcome window #########################
+def welcomewindow():
+ remove_all_widgets()
+ mainHeading()
+ welcomeLabel = Label(taz, text="Welcome User", font="Arial 30")
+ welcomeLabel.grid(row=1, column=0, padx=(50, 0), columnspan=3, pady=10)
+
+ additemButton = Button(taz, text="Manage Restaurant", width=20, height=2, fg="green", bd=10, command=additemwindow)
+ additemButton.grid(row=3, column=0)
+
+ billButton = Button(taz, text="Bill Generation", width=20, height=2, fg="green", bd=10,
+                     command=billgenerationwindow)
+ billButton.grid(row=3, column=1)
+
+ logoutButton = Button(taz, text="Logout", width=20, height=2, fg="green", bd=10, command=adminLogout)
+ logoutButton.grid(row=3, column=2)
+############### adminLoginProcess ###################
+def adminLoginProcess():
+ if usernameVar.get()=='' or passwordVar.get()=='':
+     messagebox.showerror(title="Login Error",message="Please Fill User Name and Password")
+ else:
+     db_connect()
+     #print(usernameVar.get())
+     #print(passwordVar.get())
+     username = usernameVar.get().strip()
+     password = passwordVar.get().strip()
+     que = "select * from login_info where binary username=%s and binary password=%s"
+     val = (username, password)
+     mycursor.execute(que, val)
+     data = mycursor.fetchall()
+     flag = False
+     for row in data:
+         flag = True
+
+     con.close()
+     if flag == True:
+         welcomewindow()
+
+     else:
+         messagebox.showerror(title="Login Error", message="Either USerName or Password is Incorrect")
+         usernameVar.set('')
+         passwordVar.set('')
 
 ############# Admin Login Window ###################
 usernameVar = StringVar()
 passwordVar = StringVar()
 def adminLogin():
-    mainHeading()
-    loginLabel = Label(taz, text="Admin Login", font="Arial 20")
-    loginLabel.grid(row=1, column=1, padx=(50, 0), columnspan=2, pady=10)
+ mainHeading()
+ loginLabel = Label(taz, text="Admin Login", font="Arial 20")
+ loginLabel.grid(row=1, column=1, padx=(50, 0), columnspan=2, pady=10)
 
-    usernameLabel = Label(taz, text="Username",font="Arial 15")
-    usernameLabel.grid(row=2, column=1, padx=20, pady=5)
+ usernameLabel = Label(taz, text="Username",font="Arial 15")
+ usernameLabel.grid(row=2, column=1, padx=20, pady=5)
 
-    userNameEntry=Entry(taz,font="Arial 15",textvariable=usernameVar)
-    userNameEntry.grid(row=2, column=2, padx=20, pady=5)
+ userNameEntry=Entry(taz,font="Arial 15",textvariable=usernameVar)
+ userNameEntry.grid(row=2, column=2, padx=20, pady=5)
 
-    passwordLabel = Label(taz, text="Password",font="Arial 15")
-    passwordLabel.grid(row=3, column=1, padx=20, pady=5)
+ passwordLabel = Label(taz, text="Password",font="Arial 15")
+ passwordLabel.grid(row=3, column=1, padx=20, pady=5)
 
-    passwordEntry = Entry(taz, font="Arial 15",show="*",textvariable=passwordVar)
-    passwordEntry.grid(row=3, column=2, padx=20, pady=5)
+ passwordEntry = Entry(taz, font="Arial 15",show="*",textvariable=passwordVar)
+ passwordEntry.grid(row=3, column=2, padx=20, pady=5)
 
-    btnLogin=Button(taz,text="Login",font="Arial 15",bg="green", fg="white",command=adminLoginProcess)
-    btnLogin.grid(row=4, column=1, padx=20, pady=5 ,columnspan=2)
+ btnLogin=Button(taz,text="Login",font="Arial 15",bg="green", fg="white",command=adminLoginProcess)
+ btnLogin.grid(row=4, column=1, padx=20, pady=5 ,columnspan=2)
 
 
 taz.title("Taz Hotel")

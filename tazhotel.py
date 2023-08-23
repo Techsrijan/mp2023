@@ -1,12 +1,30 @@
 from tkinter import *
 from tkinter import messagebox
+from tkinter import ttk
 import pymysql
 taz=Tk()
 h=taz.winfo_screenheight()
 w=taz.winfo_screenwidth()
 #print(h,w)
+# ========mainTreeView======================
+tazTV = ttk.Treeview(height=10, columns=('Item Name''Rate','Type'))
+############# validation ######################
+def only_numeric_input(P):
+    # checks if entry's value is an integer or empty and returns an appropriate boolean
+    if P.isdigit() or P == "":  # if a digit was entered or nothing was entered
+        return True
+    return False
+
+def only_char_input(P):
+    # checks if entry's value is an integer or empty and returns an appropriate boolean
+    if P.isalpha() or P == "":  # if a digit was entered or nothing was entered
+        return True
+    return False
 
 
+
+callback = taz.register(only_char_input)  # registers a Tcl to Python callback
+callback1 = taz.register(only_numeric_input)  # registers a Tcl to Python callback
 
 ############ billgenerationwindow ##########
 def billgenerationwindow():
@@ -42,6 +60,34 @@ def backbutton():
     remove_all_widgets()
     welcomewindow()
 
+def OnDoubleClick(event):
+    #print("hi")
+    item = tazTV.selection()
+    itemNameVar1 = tazTV.item(item, "text")
+    item_detail = tazTV.item(item, "values")
+    print(itemNameVar1,item_detail)
+    itemnameVar.set(itemNameVar1)
+    itemrateVar.set(item_detail[0])
+    itemTypeVar.set(item_detail[1])
+######### getIteminTreeView ###########
+def getIteminTreeView():
+    # to delete already inserted item
+    records = tazTV.get_children()
+
+    for element in records:
+        tazTV.delete(element)
+
+    # insert data in treeview
+    conn = pymysql.connect(host="localhost", user="root", db="tazhotel")
+    mycursor = conn.cursor(pymysql.cursors.DictCursor)
+    query = "select * from itemlist"
+    mycursor.execute(query)
+    data = mycursor.fetchall()
+    #print(data)
+    for row in data:
+        tazTV.insert('', 'end', text=row['item_name'], values=(row["item_rate"],
+                                                               row["item_type"]))
+    conn.close()
 ############################
 def additem():
     item_name=itemnameVar.get()
@@ -60,10 +106,47 @@ def additem():
         itemnameVar.set("")
         itemrateVar.set("")
         itemTypeVar.set("")
+        getIteminTreeView()
 def updateItem():
-    pass
+    item_name = itemnameVar.get()
+    item_rate = itemrateVar.get()
+    item_type = itemTypeVar.get()
+    if item_name == '' or item_rate == '' or item_type == '':
+        messagebox.showerror(title='Item Insert Error',
+                             message='Please Fill all Details')
+    else:
+        db_connect()
+        query = "update itemlist set item_rate=%s, item_type=%s where item_name=%s"
+        val = (item_rate, item_type,item_name)
+        mycursor.execute(query, val)
+        con.commit()
+        messagebox.showinfo("Update Data", 'Item Updateded Successfully')
+        itemnameVar.set("")
+        itemrateVar.set("")
+        itemTypeVar.set("")
+        getIteminTreeView()
 def deleteItem():
-    pass
+    item_name = itemnameVar.get()
+    item_rate = itemrateVar.get()
+    item_type = itemTypeVar.get()
+    if item_name == '' or item_rate == '' or item_type == '':
+        messagebox.showerror(title='Item Insert Error',
+                             message='Please Fill all Details')
+    else:
+        db_connect()
+        query = "delete from itemlist where item_name=%s "
+        val = (item_name)
+        mycursor.execute(query, val)
+        con.commit()
+        messagebox.showinfo("Delete Data", 'Item Deleted Successfully')
+        itemnameVar.set("")
+        itemrateVar.set("")
+        itemTypeVar.set("")
+        getIteminTreeView()
+
+
+
+
 
 ########## additemwindow #########
 
@@ -96,14 +179,15 @@ def additemwindow():
 
     itemnameEntry = Entry(taz, textvariable=itemnameVar)
     itemnameEntry.grid(row=2, column=2, padx=20, pady=5)
-
+    itemnameEntry.configure(validate="key", validatecommand=(callback, "%P"))  # enables validation
 
     itemrateEntry = Entry(taz, textvariable=itemrateVar)
     itemrateEntry.grid(row=3, column=2, padx=20, pady=5)
-
+    itemrateEntry.configure(validate="key", validatecommand=(callback1, "%P"))  # enables validation
 
     itemTypeEntry = Entry(taz, textvariable=itemTypeVar)
     itemTypeEntry.grid(row=4, column=2, padx=20, pady=5)
+    itemTypeEntry.configure(validate="key", validatecommand=(callback, "%P"))  # enabl
 
     updateButton = Button(taz, text="UpDate Item", width=20, height=2, fg="green", bd=10, command=updateItem)
     updateButton.grid(row=6, column=0)
@@ -115,7 +199,19 @@ def additemwindow():
     deleteButton = Button(taz, text="Delete Item", width=20, height=2, fg="green", bd=10, command=deleteItem)
     deleteButton.grid(row=6, column=3)
 
+    ################# to display treeview ##############################
+    tazTV.grid(row=7, column=0, columnspan=4)
+    scrollBar = Scrollbar(taz, orient="vertical", command=tazTV.yview)
+    scrollBar.grid(row=7, column=4, sticky="NSE")
 
+    tazTV.configure(yscrollcommand=scrollBar.set)
+
+    tazTV.heading('#0', text="Item Name")
+    tazTV.heading('#1', text="Rate")
+    tazTV.heading('#2', text="Type")
+    # get data in treeview
+    getIteminTreeView()
+    tazTV.bind("<Double-1>", OnDoubleClick)
 ########### welcome window #########################
 def welcomewindow():
  remove_all_widgets()
